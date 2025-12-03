@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Search Demo</title>
+</head>
+<body style="font-family: Arial; padding: 30px;">
+
+    <h2>Search for an Image</h2>
+
+    <input id="inputBox" placeholder="Type something like 'tom'" 
+           style="width: 300px; padding: 8px;">
+           
+    <button onclick="searchImage()" style="padding: 8px;">Show Image</button>
+
+    <br><br>
+
+    <img id="imgBox" width="300" style="border: 1px solid #ccc;">
+
+    <script>
+        function searchImage() {
+            let text = document.getElementById("inputBox").value;
+
+            //text = jerry
+            //localhost:3000/api/getImage?name=jerry
+            fetch(`/api/getImage?name=${encodeURIComponent(text)}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("imgBox").src = data.url;
+            });
+        }
+    </script>
+
+</body>
+</html>

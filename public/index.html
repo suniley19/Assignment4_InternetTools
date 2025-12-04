@@ -1,34 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Image Search Demo</title>
+    <title>Image Demo</title>
 </head>
 <body style="font-family: Arial; padding: 30px;">
+<h2>Search & Upload Images</h2>
 
-    <h2>Search for an Image</h2>
+<input id="inputBox" placeholder="Type something like 'tom'" style="width: 300px; padding: 8px;">
+<button onclick="searchImage()" style="padding: 8px;">Show Image</button>
 
-    <input id="inputBox" placeholder="Type something like 'tom'" 
-           style="width: 300px; padding: 8px;">
-           
-    <button onclick="searchImage()" style="padding: 8px;">Show Image</button>
+<br><br>
 
-    <br><br>
+<input type="file" id="file">
+<button onclick="uploadImage()" style="padding: 8px;">Upload</button>
 
-    <img id="imgBox" width="300" style="border: 1px solid #ccc;">
+<br><br>
+<img id="imgBox" width="300" style="border: 1px solid #ccc;">
 
-    <script>
-        function searchImage() {
-            let text = document.getElementById("inputBox").value;
+<br><br>
+<h3>All Images:</h3>
+<div id="gallery" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
 
-            //text = jerry
-            //localhost:3000/api/getImage?name=jerry
-            fetch(`/api/getImage?name=${encodeURIComponent(text)}`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("imgBox").src = data.url;
+<script>
+function searchImage() {
+    const text = document.getElementById("inputBox").value;
+    fetch(`/api/getImage?name=${encodeURIComponent(text)}`)
+        .then(res => res.blob())
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            document.getElementById("imgBox").src = url;
+        })
+        .catch(console.error);
+}
+
+function uploadImage() {
+    const fileInput = document.getElementById("file");
+    if (!fileInput.files.length) return alert("Select a file first!");
+
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("image", file);
+
+    fetch("/api/upload", { method: "POST", body: formData })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            loadGallery();        // refresh gallery
+        })
+        .catch(console.error);
+}
+
+function loadGallery() {
+    fetch("/api/listImages")
+        .then(res => res.json())
+        .then(data => {
+            const gallery = document.getElementById("gallery");
+            gallery.innerHTML = "";
+            data.images.forEach(img => {
+                const image = document.createElement("img");
+                image.src = img + "?t=" + new Date().getTime(); // prevent caching
+                image.width = 100;
+                image.style.border = "1px solid #ccc";
+                gallery.appendChild(image);
             });
-        }
-    </script>
+        });
+}
 
+// load all images on page load
+loadGallery();
+</script>
 </body>
 </html>

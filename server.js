@@ -17,7 +17,7 @@ if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir, { recursive: true });
 const storage = multer.diskStorage({ 
     destination: "./public",
     filename: (req, file, cb) => {
-        cb(null, `${req.query.name}.png`);
+        cb(null, `${req.query.name}.jpg`);
     }
 });
 
@@ -33,14 +33,14 @@ app.get("/api/getImage", (req, res) => {
     // look for a file in public/Image containing the query text
     const files = fs.readdirSync(imageDir);
 
-    const filepath = path.join(__dirname,'public',`${name}.png`);
+    const filepath = path.join(__dirname,'public',`${name}.jpg`);
 
     console.log(filepath);
 
     if(fs.existsSync(filepath))
-        res.json({url: `${name}.png`})
+        res.json({url: `${name}.jpg`})
     else  
-        res.send('no image found');
+        res.json({url: `default.jpg`})
 });
 
 // POST upload route
@@ -56,12 +56,6 @@ app.post("/api/upload", upload.single("image"), (req, res) => {
     const newPath = path.join(imageDir, fileName);
 
     res.json({message: 'successfully loaded'})
-});
-
-// Optional: list all images
-app.get("/api/listImages", (req, res) => {
-    const files = fs.readdirSync(imageDir).filter(f => /\.(jpg|jpeg|png|gif)$/i.test(f));
-    res.json({ images: files.map(f => "/Image/" + f) });
 });
 
 app.listen(3000, () => console.log("Server running at http://localhost:3000"));

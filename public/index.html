@@ -11,23 +11,22 @@
 
 <br><br>
 
-<input type="file" id="file">
-<button onclick="uploadImage()" style="padding: 8px;">Upload</button>
+<input type="file" style="display: block;" id="file">
+<input type="text" id="filename">
+<button onclick="uploadImage()" style="padding: 2px;">Upload</button>
 
 <br><br>
 <img id="imgBox" width="300" style="border: 1px solid #ccc;">
 
-<br><br>
-<h3>All Images:</h3>
-<div id="gallery" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
 
 <script>
 function searchImage() {
     const text = document.getElementById("inputBox").value;
     fetch(`/api/getImage?name=${encodeURIComponent(text)}`)
-        .then(res => res.blob())
+        .then(res => res.json())
         .then(blob => {
-            const url = URL.createObjectURL(blob);
+            const url = blob.url;
+            console.log(url);
             document.getElementById("imgBox").src = url;
         })
         .catch(console.error);
@@ -37,6 +36,9 @@ async function uploadImage() {
     const fileInput = document.getElementById("file");
     if (!fileInput.files.length) return alert("Select a file first!");
 
+    const fileName = document.getElementById('filename');
+    if (!fileName.value) return alert("Name is mandatory");
+
     const file = fileInput.files[0];
     const formData = new FormData();
     formData.append("image", file);
@@ -44,33 +46,15 @@ async function uploadImage() {
     console.log(file);
     console.log(formData);
 
-    await fetch(`/api/upload?name=sunil`, { method: "POST", body: formData })
+    console.log(fileName);
+
+    await fetch(`/api/upload?name=${fileName.value}`, { method: "POST", body: formData })
         .then(res => res.json())
         .then(data => {
             alert(data.message);
-            loadGallery();        // refresh gallery
         })
         .catch(console.error);
 }
-
-function loadGallery() {
-    fetch("/api/listImages")
-        .then(res => res.json())
-        .then(data => {
-            const gallery = document.getElementById("gallery");
-            gallery.innerHTML = "";
-            data.images.forEach(img => {
-                const image = document.createElement("img");
-                image.src = img + "?t=" + new Date().getTime(); // prevent caching
-                image.width = 100;
-                image.style.border = "1px solid #ccc";
-                gallery.appendChild(image);
-            });
-        });
-}
-
-// load all images on page load
-loadGallery();
 </script>
 </body>
 </html>

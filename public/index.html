@@ -33,7 +33,7 @@ function searchImage() {
         .catch(console.error);
 }
 
-function uploadImage() {
+async function uploadImage() {
     const fileInput = document.getElementById("file");
     if (!fileInput.files.length) return alert("Select a file first!");
 
@@ -41,7 +41,10 @@ function uploadImage() {
     const formData = new FormData();
     formData.append("image", file);
 
-    fetch("/api/upload", { method: "POST", body: formData })
+    console.log(file);
+    console.log(formData);
+
+    await fetch(`/api/upload?name=sunil`, { method: "POST", body: formData })
         .then(res => res.json())
         .then(data => {
             alert(data.message);

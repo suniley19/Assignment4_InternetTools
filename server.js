@@ -14,14 +14,14 @@ const imageDir = path.join(__dirname, "public", "Image");
 if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir, { recursive: true });
 
 // Multer setup for temporary uploads
-const send = multer({ 
-    dest: "./uploads",
-    fileName: (res, file, cb) => {
-        cb(null, `${res.query.name}`);
+const storage = multer.diskStorage({ 
+    destination: "./uploads",
+    filename: (req, file, cb) => {
+        cb(null, `${req.query.name}.png`);
     }
 });
 
-const upload = multer({send});
+const upload = multer({storage});
 
 // GET image by name
 app.get("/api/getImage", (req, res) => {
@@ -49,10 +49,7 @@ app.post("/api/upload", upload.single("image"), (req, res) => {
     const fileName = Date.now() + ext;
     const newPath = path.join(imageDir, fileName);
 
-    fs.rename(req.file.path, newPath, (err) => {
-        if (err) return res.status(500).json({ error: "Failed to save file", details: err });
-        res.json({ message: "Uploaded successfully", file: "/Image/" + fileName });
-    });
+    res.send('successfully loaded')
 });
 
 // Optional: list all images
